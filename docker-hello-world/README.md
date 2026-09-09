@@ -30,7 +30,7 @@ julicorlando/ebac-docker-hello-world:1.0
 julicorlando/ebac-docker-hello-world:latest
 ```
 
-O workflow utiliza os secrets `DOCKERHUB_USERNAME` e `DOCKERHUB_TOKEN` cadastrados no repositório.
+O workflow utiliza o secret `DOCKERHUB_TOKEN` cadastrado em Repository secrets no GitHub. O usuário do Docker Hub está definido como `julicorlando` no próprio workflow.
 
 ## Link para entrega na EBAC
 
