@@ -1,40 +1,58 @@
-name: Python application
+name: CI - Build e Testes
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
 
 jobs:
   build:
+    name: Validar aplicação
+    runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
       matrix:
         python-version: [3.14.3]
         poetry-version: [2.3.2]
 
-    runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Poetry ${{ matrix.poetry-version }}
+      - name: Instalar Poetry ${{ matrix.poetry-version }}
         run: |
           python -m pip install --upgrade pip
           pip install poetry==${{ matrix.poetry-version }}
 
-      - name: Install dependencies
-        shell: bash
-        run: |
-          poetry install
+      - name: Instalar dependências
+        run: poetry install --no-root
 
-      - name: Run tests
+      - name: Validar configuração do Django
         env:
           SECRET_KEY: "test_key"
           DEBUG: 1
           DJANGO_ALLOWED_HOSTS: "localhost 127.0.0.1"
           SQL_ENGINE: "django.db.backends.sqlite3"
           SQL_DATABASE: "db.sqlite3"
-        run: |
-          poetry run python manage.py test
+        run: poetry run python manage.py check
+
+      - name: Executar testes
+        env:
+          SECRET_KEY: "test_key"
+          DEBUG: 1
+          DJANGO_ALLOWED_HOSTS: "localhost 127.0.0.1"
+          SQL_ENGINE: "django.db.backends.sqlite3"
+          SQL_DATABASE: "db.sqlite3"
+        run: poetry run python manage.py test
