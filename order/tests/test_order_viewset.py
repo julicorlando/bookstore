@@ -1,57 +1,80 @@
-import json
+from decimal import Decimal
 
-from rest_framework import status
-from rest_framework.test import APITestCase, APIClient
-
+from django.contrib.auth.models import User
 from django.urls import reverse
+from rest_framework import status
+from rest_framework.test import APITestCase
 
-from product.factories import ProductFactory, CategoryFactory
-from order.factories import OrderFactory, UserFactory
 from order.models import Order
-from product.models import Product
+from product.models import Category, Product
 
 
 class TestOrderViewSet(APITestCase):
-
-    client = APIClient()
-
     def setUp(self):
-        self.category = CategoryFactory(title="Technology")
-        self.product = ProductFactory(
-            category=[self.category], title="Laptop", price=999.99
+        self.user = User.objects.create_user(
+            username="julio",
+            password="test12345",
         )
-        self.order = OrderFactory(product=(self.product,))
+        self.category = Category.objects.create(
+            title="Books",
+            slug="books",
+            description="Books category",
+        )
+        self.product = Product.objects.create(
+            title="Django for APIs",
+            description="Django REST Framework book",
+            price=Decimal("99.90"),
+        )
+        self.product.category.add(self.category)
+        self.order = Order.objects.create(user=self.user)
+        self.order.product.add(self.product)
 
-    def test_order(self):
-        url = reverse("order-list", kwargs={"version": "v1"})
+    def test_list_orders(self):
+        response = self.client.get(reverse("order-list", kwargs={"version": "v1"}))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        order = response.data["results"][0]
+        self.assertEqual(order["product"][0]["title"], "Django for APIs")
+        self.assertEqual(order["product"][0]["category"][0]["title"], "Books")
+        self.assertEqual(float(order["total"]), 99.90)
+
+    def test_retrieve_order(self):
+        url = reverse(
+            "order-detail",
+            kwargs={"version": "v1", "pk": self.order.pk},
+        )
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        order_data = json.loads(response.content)
-        self.assertEqual(
-            order_data["results"][0]["product"][0]["title"], self.product.title
-        )
-        self.assertEqual(
-            float(order_data["results"][0]["product"][0]["price"]),
-            float(self.product.price),
-        )
-        self.assertEqual(
-            order_data["results"][0]["product"][0]["active"], self.product.active
-        )
-        self.assertEqual(
-            order_data["results"][0]["product"][0]["category"][0]["title"],
-            self.category.title,
-        )
+        self.assertEqual(response.data["user"], self.user.id)
+        self.assertEqual(response.data["product"][0]["title"], "Django for APIs")
 
     def test_create_order(self):
-        user = UserFactory()
-        product = ProductFactory()
-        data = json.dumps({"product_ids": [product.id], "user": user.id})
+        second_product = Product.objects.create(
+            title="Python Book",
+            description="Python book",
+            price=Decimal("49.90"),
+        )
+        data = {
+            "user": self.user.id,
+            "product_ids": [second_product.id],
+        }
         response = self.client.post(
             reverse("order-list", kwargs={"version": "v1"}),
-            data=data,
-            content_type="application/json",
+            data,
+            format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        created_order = Order.objects.get(user=user)
+        created = Order.objects.exclude(pk=self.order.pk).get(user=self.user)
+        self.assertTrue(created.product.filter(pk=second_product.pk).exists())
+
+    def test_delete_order(self):
+        url = reverse(
+            "order-detail",
+            kwargs={"version": "v1", "pk": self.order.pk},
+        )
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Order.objects.filter(pk=self.order.pk).exists())

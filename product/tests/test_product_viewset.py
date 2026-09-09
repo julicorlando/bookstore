@@ -1,67 +1,70 @@
-import json
-
-from rest_framework import status
-from rest_framework.test import APITestCase, APIClient
-from rest_framework.authtoken.models import Token
+from decimal import Decimal
 
 from django.urls import reverse
+from rest_framework import status
+from rest_framework.test import APITestCase
 
-from product.factories import ProductFactory, CategoryFactory
-from order.factories import UserFactory
-from product.models import Product
+from product.models import Category, Product
 
 
 class TestProductViewSet(APITestCase):
-
-    client = APIClient()
-
     def setUp(self):
-        self.user = UserFactory()
-        token = Token.objects.create(user=self.user)
-        token.save()
-        self.product = ProductFactory(
-            title="Mouse",
-            price=50.00,
+        self.category = Category.objects.create(
+            title="Technology",
+            slug="technology",
+            description="Technology category",
         )
+        self.product = Product.objects.create(
+            title="Mouse",
+            description="Wireless mouse",
+            price=Decimal("50.00"),
+        )
+        self.product.category.add(self.category)
 
-    def test_get_all_products(self):
-        token = Token.objects.get(user__username=self.user.username)
-        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+    def test_list_products(self):
+        response = self.client.get(reverse("product-list", kwargs={"version": "v1"}))
 
-        url = reverse("product-list", kwargs={"version": "v1"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        product = response.data["results"][0]
+        self.assertEqual(product["title"], "Mouse")
+        self.assertEqual(product["category"][0]["title"], "Technology")
+
+    def test_retrieve_product(self):
+        url = reverse(
+            "product-detail",
+            kwargs={"version": "v1", "pk": self.product.pk},
+        )
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        product_data = json.loads(response.content)
-        self.assertEqual(product_data["results"][0]["title"], self.product.title)
-        self.assertEqual(
-            float(product_data["results"][0]["price"]), float(self.product.price)
-        )
-        self.assertEqual(product_data["results"][0]["active"], self.product.active)
+        self.assertEqual(response.data["title"], "Mouse")
+        self.assertEqual(response.data["category"][0]["slug"], "technology")
 
     def test_create_product(self):
-        token = Token.objects.get(user__username=self.user.username)
-        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
-
-        category = CategoryFactory()
-        data = json.dumps(
-            {
-                "title": "Keyboard",
-                "price": 80.00,
-                "categories_ids": [category.id],
-                "slug": "keyboard",
-                "description": "A very good mechanical keyboard",
-                "active": True,
-            }
-        )
+        data = {
+            "title": "Keyboard",
+            "description": "Mechanical keyboard",
+            "price": "80.00",
+            "active": True,
+            "categories_ids": [self.category.id],
+        }
         response = self.client.post(
             reverse("product-list", kwargs={"version": "v1"}),
-            data=data,
-            content_type="application/json",
+            data,
+            format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        created = Product.objects.get(title="Keyboard")
+        self.assertEqual(created.price, Decimal("80.00"))
+        self.assertTrue(created.category.filter(pk=self.category.pk).exists())
 
-        created_product = Product.objects.get(title="Keyboard")
-        self.assertEqual(created_product.price, 80.00)
-        self.assertEqual(created_product.title, "Keyboard")
+    def test_delete_product(self):
+        url = reverse(
+            "product-detail",
+            kwargs={"version": "v1", "pk": self.product.pk},
+        )
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Product.objects.filter(pk=self.product.pk).exists())
