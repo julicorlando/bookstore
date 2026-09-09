@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_extensions",
+    # Django REST Framework - exercício EBAC
     "rest_framework",
     "order",
     "product",
