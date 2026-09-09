@@ -23,14 +23,17 @@ Hello World - Julio Orlando
 
 ## Publicação no Docker Hub
 
-Substitua `SEU_USUARIO_DOCKERHUB` pelo seu usuário real:
+A imagem é publicada automaticamente pelo GitHub Actions para:
 
-```bash
-docker login
-docker tag ebac-docker-hello-world:1.0 SEU_USUARIO_DOCKERHUB/ebac-docker-hello-world:1.0
-docker tag ebac-docker-hello-world:1.0 SEU_USUARIO_DOCKERHUB/ebac-docker-hello-world:latest
-docker push SEU_USUARIO_DOCKERHUB/ebac-docker-hello-world:1.0
-docker push SEU_USUARIO_DOCKERHUB/ebac-docker-hello-world:latest
+```text
+julicorlando/ebac-docker-hello-world:1.0
+julicorlando/ebac-docker-hello-world:latest
 ```
 
-Após o push, entregue na EBAC o link do repositório da imagem no Docker Hub.
+O workflow utiliza os secrets `DOCKERHUB_USERNAME` e `DOCKERHUB_TOKEN` cadastrados no repositório.
+
+## Link para entrega na EBAC
+
+```text
+https://hub.docker.com/r/julicorlando/ebac-docker-hello-world
+```
