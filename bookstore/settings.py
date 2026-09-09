@@ -85,37 +85,24 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-ON_PYTHONANYWHERE = "PYTHONANYWHERE_DOMAIN" in os.environ
-
-if ON_PYTHONANYWHERE:
+if os.environ.get("SQL_ENGINE"):
+    DATABASES = {
+        "default": {
+            "ENGINE": os.environ["SQL_ENGINE"],
+            "NAME": os.environ.get("SQL_DATABASE", "bookstore_dev_db"),
+            "USER": os.environ.get("SQL_USER", "bookstore_dev"),
+            "PASSWORD": os.environ.get("SQL_PASSWORD", "bookstore_dev"),
+            "HOST": os.environ.get("SQL_HOST", "db"),
+            "PORT": os.environ.get("SQL_PORT", "5432"),
+        }
+    }
+else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
-            "NAME": os.environ.get("SQL_DATABASE", BASE_DIR / "db.sqlite3"),
-            "USER": os.environ.get("SQL_USER", "user"),
-            "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
-            "HOST": os.environ.get("SQL_HOST", "localhost"),
-            "PORT": os.environ.get("SQL_PORT", "5432"),
-        }
-    }
-
-DATABASES = {
-    "default": {
-        "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
-        "NAME": os.environ.get("SQL_DATABASE", BASE_DIR / "db.sqlite3"),
-        "USER": os.environ.get("SQL_USER", "user"),
-        "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
-        "HOST": os.environ.get("SQL_HOST", "localhost"),
-        "PORT": os.environ.get("SQL_PORT", "5432"),
-    }
-}
 
 
 # Password validation
