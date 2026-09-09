@@ -1,14 +1,28 @@
 # Bookstore
 
-Bookstore APP from Backend Python course from EBAC
+Bookstore APP from Backend Python course from EBAC.
+
+## Exercício - Django REST Framework
+
+Este repositório contém a configuração solicitada na atividade da EBAC para adicionar o Django REST Framework (DRF) ao projeto `bookstore`.
+
+A dependência `djangorestframework` está declarada no `pyproject.toml` e o app `rest_framework` está registrado em `INSTALLED_APPS` no arquivo `bookstore/settings.py`.
+
+Comandos utilizados na atividade:
+
+```shell
+poetry add djangorestframework
+poetry update
+poetry run python manage.py check
+poetry run python manage.py runserver
+```
 
 ## Prerequisites
 
-```
-Python 3.14>
+```text
+Python 3.14+
 Poetry
 Docker && docker-compose
-
 ```
 
 ## Quickstart
@@ -16,7 +30,7 @@ Docker && docker-compose
 1. Clone this project
 
    ```shell
-   git clone https://github.com/Lunes0/bookstore.git
+   git clone https://github.com/julicorlando/bookstore.git
    ```
 
 2. Install dependencies:
