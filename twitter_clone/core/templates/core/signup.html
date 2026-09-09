@@ -1,0 +1,10 @@
+{% extends 'core/base.html' %}
+{% block title %}Criar conta · Pulse{% endblock %}
+{% block content %}
+<section class="auth-card wide">
+  <div class="brand big">Pulse</div>
+  <h1>Crie sua conta</h1>
+  <form method="post" class="stack-form">{% csrf_token %}{{ form.as_p }}<button class="primary" type="submit">Criar conta</button></form>
+  <p>Já tem conta? <a href="{% url 'login' %}">Entrar</a></p>
+</section>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}Pulse{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'core/style.css' %}">
+</head>
+<body>
+<div class="shell">
+  {% if user.is_authenticated %}
+  <aside class="sidebar">
+    <a class="brand" href="{% url 'feed' %}">Pulse</a>
+    <nav>
+      <a href="{% url 'feed' %}">Início</a>
+      <a href="{% url 'explore' %}">Explorar</a>
+      <a href="{% url 'profile' user.username %}">Perfil</a>
+      <a href="{% url 'edit_profile' %}">Configurações</a>
+    </nav>
+    <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="link-button" type="submit">Sair</button></form>
+  </aside>
+  {% endif %}
+  <main class="content {% if not user.is_authenticated %}auth-content{% endif %}">
+    {% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+</body>
+</html>

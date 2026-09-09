@@ -1,0 +1,14 @@
+{% extends 'core/base.html' %}
+{% block title %}@{{ profile_user.username }} · Pulse{% endblock %}
+{% block content %}
+<section class="profile-hero">
+  <div class="profile-avatar">{% if profile_user.profile.avatar %}<img src="{{ profile_user.profile.avatar.url }}" alt="">{% else %}{{ profile_user.username|first|upper }}{% endif %}</div>
+  <div class="profile-actions">{% if profile_user == user %}<a class="outline" href="{% url 'edit_profile' %}">Editar perfil</a>{% else %}<form method="post" action="{% url 'follow_toggle' profile_user.username %}">{% csrf_token %}<button class="{% if is_following %}outline{% else %}primary{% endif %}" type="submit">{% if is_following %}Deixar de seguir{% else %}Seguir{% endif %}</button></form>{% endif %}</div>
+  <h1>{{ profile_user.get_full_name|default:profile_user.username }}</h1>
+  <p class="handle">@{{ profile_user.username }}</p>
+  {% if profile_user.profile.bio %}<p>{{ profile_user.profile.bio }}</p>{% endif %}
+  <div class="counts"><a href="{% url 'connections' profile_user.username 'following' %}"><strong>{{ following_count }}</strong> seguindo</a><a href="{% url 'connections' profile_user.username 'followers' %}"><strong>{{ followers_count }}</strong> seguidores</a></div>
+</section>
+<header class="page-head"><h2>Publicações</h2></header>
+{% for post in posts %}{% include 'core/_post.html' %}{% empty %}<div class="empty">Nenhuma publicação ainda.</div>{% endfor %}
+{% endblock %}

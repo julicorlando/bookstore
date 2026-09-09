@@ -1,0 +1,1 @@
+web: gunicorn socialnet.wsgi:application --chdir twitter_clone
