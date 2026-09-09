@@ -1,0 +1,14 @@
+<article class="post-card">
+  <div class="post-head">
+    <div class="avatar">{% if post.author.profile.avatar %}<img src="{{ post.author.profile.avatar.url }}" alt="">{% else %}{{ post.author.username|first|upper }}{% endif %}</div>
+    <div><a class="user-name" href="{% url 'profile' post.author.username %}">{{ post.author.get_full_name|default:post.author.username }}</a><span class="handle">@{{ post.author.username }} · {{ post.created_at|timesince }}</span></div>
+  </div>
+  <p class="post-text">{{ post.content }}</p>
+  <div class="post-actions">
+    <form method="post" action="{% url 'like_toggle' post.id %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}"><button class="action {% if post.id in liked_ids %}active{% endif %}" type="submit">♥ {{ post.likes.count }}</button></form>
+    <span class="action">💬 {{ post.comments.count }}</span>
+    {% if post.author == user %}<form method="post" action="{% url 'post_delete' post.id %}">{% csrf_token %}<button class="action danger" type="submit">Excluir</button></form>{% endif %}
+  </div>
+  {% if post.comments.all %}<div class="comments">{% for comment in post.comments.all %}<p><strong>@{{ comment.author.username }}</strong> {{ comment.content }}</p>{% endfor %}</div>{% endif %}
+  <form class="comment-form" method="post" action="{% url 'comment_add' post.id %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}">{{ comment_form.content }}<button type="submit">Enviar</button></form>
+</article>

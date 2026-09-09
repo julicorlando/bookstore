@@ -1,0 +1,6 @@
+{% extends 'core/base.html' %}
+{% block title %}Explorar · Pulse{% endblock %}
+{% block content %}
+<header class="page-head"><h1>Explorar pessoas</h1></header>
+<div class="people-list">{% for person in users %}<div class="person-row"><div class="avatar">{% if person.profile.avatar %}<img src="{{ person.profile.avatar.url }}" alt="">{% else %}{{ person.username|first|upper }}{% endif %}</div><div class="grow"><a class="user-name" href="{% url 'profile' person.username %}">{{ person.get_full_name|default:person.username }}</a><span class="handle">@{{ person.username }} · {{ person.follower_count }} seguidores</span>{% if person.profile.bio %}<p>{{ person.profile.bio }}</p>{% endif %}</div><form method="post" action="{% url 'follow_toggle' person.username %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}"><button class="{% if person.id in following_ids %}outline{% else %}primary{% endif %}" type="submit">{% if person.id in following_ids %}Seguindo{% else %}Seguir{% endif %}</button></form></div>{% empty %}<div class="empty">Nenhum outro usuário por enquanto.</div>{% endfor %}</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'core/base.html' %}
+{% block title %}Início · Pulse{% endblock %}
+{% block content %}
+<header class="page-head"><h1>Início</h1></header>
+<section class="composer">
+  <form method="post">{% csrf_token %}{{ form.content }}<div class="composer-bottom"><span>Até 280 caracteres</span><button class="primary" type="submit">Publicar</button></div></form>
+</section>
+{% if posts %}{% for post in posts %}{% include 'core/_post.html' %}{% endfor %}{% else %}<div class="empty"><h2>Seu feed está tranquilo por aqui.</h2><p>Siga pessoas em <a href="{% url 'explore' %}">Explorar</a> para ver as publicações delas.</p></div>{% endif %}
+{% endblock %}

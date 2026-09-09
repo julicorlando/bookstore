@@ -1,0 +1,6 @@
+{% extends 'core/base.html' %}
+{% block title %}Editar perfil · Pulse{% endblock %}
+{% block content %}
+<header class="page-head"><h1>Editar perfil</h1></header>
+<section class="form-card"><form method="post" enctype="multipart/form-data" class="stack-form">{% csrf_token %}<h3>Dados da conta</h3>{{ user_form.as_p }}<h3>Perfil</h3>{{ profile_form.as_p }}<button class="primary" type="submit">Salvar alterações</button></form><a class="secondary-link" href="{% url 'password_change' %}">Alterar senha</a></section>
+{% endblock %}
