@@ -2,6 +2,11 @@ name: CI - Build e Testes
 
 on:
   push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
