@@ -1,13 +1,16 @@
 from rest_framework import serializers
 
-from product.models.product import Product, Category
+from product.models import Category, Product
 from product.serializers.category_serializer import CategorySerializer
 
 
 class ProductSerializer(serializers.ModelSerializer):
     category = CategorySerializer(many=True, read_only=True)
     categories_ids = serializers.PrimaryKeyRelatedField(
-        queryset=Category.objects.all(), write_only=True, many=True
+        queryset=Category.objects.all(),
+        write_only=True,
+        many=True,
+        required=False,
     )
 
     class Meta:
@@ -21,16 +24,18 @@ class ProductSerializer(serializers.ModelSerializer):
             "category",
             "categories_ids",
         ]
-        extra_kwargs = {
-            "description": {"required": False},
-            "category": {"required": False},
-            "categories_ids": {"required": False},
-        }
 
     def create(self, validated_data):
-        category_data = validated_data.pop("categories_ids")
+        categories = validated_data.pop("categories_ids", [])
         product = Product.objects.create(**validated_data)
-        for category in category_data:
-            product.category.add(category)
-
+        product.category.set(categories)
         return product
+
+    def update(self, instance, validated_data):
+        categories = validated_data.pop("categories_ids", None)
+        instance = super().update(instance, validated_data)
+
+        if categories is not None:
+            instance.category.set(categories)
+
+        return instance
