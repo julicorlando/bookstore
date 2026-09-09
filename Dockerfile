@@ -1,5 +1,8 @@
-# Base do Python
+# Dockerfile do projeto Bookstore - exercício EBAC
 FROM python:3.14.3-slim AS python-base
+
+LABEL org.opencontainers.image.title="Bookstore"
+LABEL org.opencontainers.image.description="Imagem Docker do projeto Bookstore para o exercício da EBAC"
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
