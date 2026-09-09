@@ -6,6 +6,4 @@ from product.serializers import ProductSerializer
 
 class ProductViewSet(ModelViewSet):
     serializer_class = ProductSerializer
-
-    def get_queryset(self):
-        return Product.objects.all().order_by("-id")
+    queryset = Product.objects.prefetch_related("category").all().order_by("-id")
